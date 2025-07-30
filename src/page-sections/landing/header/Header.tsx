@@ -25,6 +25,9 @@ export default function Header() {
 
   const toggleSidenav = () => setOpen((open) => !open);
 
+  const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
+  const registerUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
+
   const scrollListener = useCallback(
     debounce(() => {
       if (window?.scrollY >= headerHeight) setFixed(true);
@@ -80,6 +83,27 @@ export default function Header() {
                 Purchase Now
               </Button>
             </a>
+
+            <div style={{marginRight: "1rem"}}>
+            </div>
+
+
+            <a href={loginUrl}>
+              <Button variant="outlined" color="secondary" p="0.25rem 1.25rem">
+                Login
+              </Button>
+            </a>
+
+            <div style={{marginRight: "1rem"}}>
+            </div>
+
+            <a href={registerUrl}>
+              <Button variant="outlined" color="secondary" p="0.25rem 1.25rem" >
+                Register
+              </Button>
+            </a>
+
+
           </FlexBox>
 
           {/* mobile menu */}
