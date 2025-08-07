@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Box from "@component/Box";
 import Container from "@component/Container";
-import Navbar from "@component/navbar/Navbar";
+import Navbar from "@component/navbar/Navbar copy";
 import { Carousel } from "@component/carousel";
 import { CarouselCard1 } from "@component/carousel-cards";
 // API FUNCTIONS
