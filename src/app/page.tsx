@@ -3,8 +3,8 @@
 import Head from "next/head"
 import Image from "next/image"
 import React, { useState } from "react"
-import Navbar from "@component/navbar/Navbar"
-import Footer from "@sections/landing/footer"
+import NavBar from "@component/navbar/Navbar"
+import Footer from "@component/footer/Footer/Footer"
 import { marginTop } from "styled-system"
 
 export default function Home() {
@@ -98,7 +98,7 @@ export default function Home() {
                 width: '100%',
                 minHeight: '50vh'
             }}>
-                {/* <Navbar/> */}
+                <NavBar/>
                 <div style={{
                     position: 'relative',
                     width: '100%',
@@ -664,7 +664,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* <Footer /> */}
+            <Footer />
         </>
     )
 }
