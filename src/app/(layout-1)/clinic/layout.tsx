@@ -1,149 +1,372 @@
 "use client"
-import {ChatBox, PromptGroup, SpaceLarge, SpaceMedium, SpaceSmall} from "./components";
-import Image from "next/image"
-import React from "react";
+
+import React, {useEffect, useState} from "react";
+import Image from "next/image";
 import {useRouter} from "next/navigation";
+import { display } from "styled-system";
 
 // Color constants
 const COLORS = {
-  clinicGray: '#6b7280'
+  lightGray: '#f9fafb',
+  clinicBorder: '#e5e7eb',
+  clinicText: '#374151',
+  newChatText: '#9ca3af',
+  white: '#ffffff',
+  black: '#000000',
+  primaryBlue: '#0070F3'
 };
 
-export default function Page() {
-    const router = useRouter()
+// Import auth utils - make sure this path is correct
+const loginUrl = "/login"; // Adjust this path as needed
 
-    function onSendMessage(text: string) {
-        if (text == "") {
-            return
+// Inline component definitions to avoid import issues
+function SessionHeader() {
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [token, setToken] = useState("");
+
+    useEffect(() => {
+        const t = sessionStorage.getItem("token");
+        if (t != null && t != "") {
+            setLoggedIn(true)
+            setToken(t)
+            console.log(" logged in", token)
+        } else {
+            setLoggedIn(false);
+            console.log("not logged in")
         }
+    }, [])
 
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0ZW1wX2F1ZGllbmNlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdCIsImVtYWlsIjoib3RpZW5vc2Ftd2VsbWl0dG9AZ21haWwuY29tIn0.UT961kEmqTkSFjo2vmtswPfNTsTMJ8Gr-ImD1Gg9BW0");
-        myHeaders.append("Content-Type", "application/json");
+    const headerStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: '1rem',
+        borderBottom: `1px solid ${COLORS.clinicBorder}`
+    };
 
-        const raw = JSON.stringify({
-            "lifeCycleStage": "",
-            "sector": "",
-            "industry": "",
-            "painPoints": text
-        });
+    const logoContainerStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        alignItems: 'center'
+    };
 
-        fetch("http://20.127.243.189/v1/clinic/session", {
-            method: "POST",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow"
-        })
-            .then((response) => response.json())
-            .then((result) => {
-                const path = "/clinic/" + result.sessionId;
-                router.push(path);
-                console.log(path)
-            })
-            .catch((error) => console.error(error));
+    const logoTextStyle: React.CSSProperties = {
+        paddingLeft: '0.5rem',
+        paddingRight: '0.5rem',
+        fontSize: '1rem',
+        color: COLORS.clinicText,
+        fontWeight: '300'
+    };
+
+    const userAvatarStyle: React.CSSProperties = {
+        height: '2.25rem',
+        width: '2.25rem',
+        borderRadius: '50%',
+        backgroundColor: COLORS.primaryBlue,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center'
+    };
+
+    const avatarTextStyle: React.CSSProperties = {
+        fontWeight: '400',
+        color: COLORS.white,
+        fontSize: '1rem'
+    };
+
+    const loginButtonStyle: React.CSSProperties = {
+        backgroundColor: COLORS.primaryBlue,
+        borderRadius: '0.375rem',
+        width: '6rem',
+        height: '2.25rem',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        cursor: 'pointer'
+    };
+
+    const loginTextStyle: React.CSSProperties = {
+        fontSize: '0.875rem',
+        fontWeight: '500',
+        color: COLORS.white
+    };
+
+    return (
+        <div style={headerStyle}>
+            <div style={logoContainerStyle}>
+                <Image src={"/icons/clinic_logo.svg"} width={20} height={20} alt={"clinic logo"}/>
+                <p style={logoTextStyle}>DBP Clinic</p>
+            </div>
+
+            {loggedIn && (
+                <div style={userAvatarStyle}>
+                    <p style={avatarTextStyle}>S</p>
+                </div>
+            )}
+
+            {!loggedIn && (
+                <div style={loginButtonStyle} onClick={() => window.location.href = loginUrl}>
+                    <p style={loginTextStyle}>Login</p>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function LoginPromptText() {
+    const containerStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'row',
+        marginTop: '1.5rem'
+    };
+
+    const textStyle: React.CSSProperties = {
+        fontSize: '0.875rem'
+    };
+
+    const linkStyle: React.CSSProperties = {
+        textDecoration: 'underline',
+        cursor: 'pointer',
+        color: COLORS.primaryBlue
+    };
+
+    return (
+        <div style={containerStyle}>
+            <p style={textStyle}>
+                <span 
+                    style={linkStyle}
+                    onClick={() => window.location.href = loginUrl}
+                >
+                    Login
+                </span> to save and revisit previous chats!
+            </p>
+        </div>
+    )
+}
+
+export default function Layout({children}: { children: React.ReactNode }) {
+    const sessionModel: SessionModel = {
+        sessionId: "dfsfsdgfsgdkshfd-fdhfskdjfgsdkhfs-fsdfksjdh",
+        sessionName: "Digital Maturity Assessment."
     }
 
-    // Main container styles
-    const mainContainerStyle: React.CSSProperties = {
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [token, setToken] = useState("");
+    const [showMenu, setShowMenu] = useState(true);
+
+    // Check if the user is logged in
+    useEffect(() => {
+        const t = sessionStorage.getItem("token");
+        if (t != null && t != "") {
+            setLoggedIn(true)
+            setToken(t)
+            console.log(" logged in", token)
+        } else {
+            setLoggedIn(false);
+            console.log("not logged in")
+        }
+    }, [])
+
+    function onMenuClick() {
+        setShowMenu(!showMenu);
+    }
+
+    // Main layout styles
+    const mainLayoutStyle: React.CSSProperties = {
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         width: '100%',
-        height: '100%',
-        justifyContent: 'space-between'
+        height: '100vh'
     };
 
-    const contentContainerStyle: React.CSSProperties = {
+    const sidebarStyle: React.CSSProperties = {
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        width: '100%'
+        backgroundColor: COLORS.lightGray,
+        padding: '1.5rem',
+        minWidth: '280px'
     };
 
-    const centerContainerStyle: React.CSSProperties = {
+    const sidebarHeaderStyle: React.CSSProperties = {
         display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    };
+
+    const logoStyle: React.CSSProperties = {
+        cursor: 'pointer'
+    };
+
+    const spacerStyle: React.CSSProperties = {
+        width: '10rem'
+    };
+
+    const menuButtonStyle: React.CSSProperties = {
+        padding: '0.5rem',
+        cursor: 'pointer',
+        borderRadius: '0.375rem',
+        border: `1px solid ${COLORS.clinicBorder}`,
+        backgroundColor: COLORS.white
+    };
+
+    const spacerVerticalStyle: React.CSSProperties = {
+        height: '1rem',
+        width: '5rem'
+    };
+
+    const newChatHeaderStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    };
+
+    const newChatTextStyle: React.CSSProperties = {
+        fontSize: '0.875rem',
+        color: COLORS.newChatText
+    };
+
+    const plusButtonStyle: React.CSSProperties = {
+        padding: '0.5rem',
+        border: '1px solid',
+        borderRadius: '0.375rem',
+        cursor: 'pointer',
+        backgroundColor: COLORS.white,
+        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
     };
 
-    const logoRowStyle: React.CSSProperties = {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center'
-    };
-
-    const logoImageStyle: React.CSSProperties = {
-        margin: '0.5rem'
-    };
-
-    const welcomeTextStyle: React.CSSProperties = {
+    const todayTextStyle: React.CSSProperties = {
         fontWeight: 'bold',
-        color: COLORS.clinicGray
+        fontSize: '1rem',
+        color: COLORS.black
     };
 
-    const descriptionTextStyle: React.CSSProperties = {
-        color: COLORS.clinicGray,
-        width: '33.333333%',
-        textAlign: 'center',
-        fontSize: '0.875rem'
-    };
-
-    const promptContainerStyle: React.CSSProperties = {
+    const contentAreaStyle: React.CSSProperties = {
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        marginLeft: '13rem',
-        marginRight: '13rem',
-        marginTop: '1.25rem'
+        width: '100%',
+        height: '100vh',
+        justifyContent: 'space-between'
     };
 
-    return (
-        <div style={mainContainerStyle}>
-            <SpaceLarge/>
+    const floatingMenuButtonStyle: React.CSSProperties = {
+        position: 'absolute',
+        top: '5rem',
+        left: '1rem',
+        padding: '0.5rem',
+        cursor: 'pointer',
+        borderRadius: '0.375rem',
+        border: `1px solid ${COLORS.clinicBorder}`,
+        backgroundColor: COLORS.white,
+        width: 'fit-content',
+        height: 'fit-content',
+        zIndex: 10
+    };
 
-            <div style={contentContainerStyle}>
-                <div style={centerContainerStyle}>
-                    <div style={logoRowStyle}>
+    const childrenContainerStyle: React.CSSProperties = {
+        display: 'flex',
+        paddingBottom: '2rem',
+        overflowY: 'auto',
+        flex: 1
+    };
+
+    console.log("Layout rendering - showMenu:", showMenu); // Debug log
+
+    return (
+        <div style={mainLayoutStyle}>
+            {/* Sidebar */}
+            {showMenu && (
+                <div style={sidebarStyle}>
+                    <div style={sidebarHeaderStyle}>
                         <Image 
-                            src={"/icons/clinic_logo.svg"} 
-                            height={"26"} 
-                            width={"26"} 
-                            alt={"icon"}
-                            style={logoImageStyle}
+                            src={"/icons/dto4t_logo.svg"} 
+                            width={94} 
+                            height={24} 
+                            alt={"logo"}
+                            style={logoStyle}
                         />
-                        <Image src={"/icons/plus.svg"} height={"26"} width={"10"} alt={"icon"}/>
-                        <Image 
-                            src={"/icons/chat.svg"} 
-                            height={"32"} 
-                            width={"32"} 
-                            alt={"icon"} 
-                            style={logoImageStyle}
-                        />
+
+                        <p style={spacerStyle}></p>
+
+                        <div style={menuButtonStyle} onClick={onMenuClick}>
+                            <Image src={"/icons/menu.svg"} width={21} height={21} alt={"icon"}/>
+                        </div>
                     </div>
 
-                    <SpaceSmall/>
+                    <div style={spacerVerticalStyle}></div>
 
-                    <p style={welcomeTextStyle}>Welcome to DBP Clinic</p>
+                    <div style={newChatHeaderStyle}>
+                        <p style={newChatTextStyle}>New Chat</p>
 
-                    <SpaceSmall/>
+                        <div style={plusButtonStyle}>
+                            <Image src={"/icons/plus.svg"} height={16} width={16} alt={"icon"}/>
+                        </div>
+                    </div>
 
-                    <p style={descriptionTextStyle}>
-                        Gain deep insights into your digital capabilities and receive
-                        tailored recommendations to accelerate growth.
-                    </p>
+                    {!loggedIn && <LoginPromptText/>}
+
+                    {!loggedIn && (
+                        <div>
+                            <div style={{}}></div>
+                            <p style={todayTextStyle}>Today</p>
+                            <SessionItem sessionModel={sessionModel}/>
+                        </div>
+                    )}
                 </div>
-            </div>
+            )}
 
-            <SpaceMedium/>
-            
-            <PromptGroup clickItem={(t) => {
-                onSendMessage(t)
-            }}/>
-
-            <div style={promptContainerStyle}>
-                <ChatBox onSend={onSendMessage}/>
+            {/* Main Content Area */}
+            <div style={contentAreaStyle}>
+                <SessionHeader/>
+                
+                {!showMenu && (
+                    <div style={floatingMenuButtonStyle} onClick={onMenuClick}>
+                        <Image src={"/icons/menu.svg"} width={24} height={24} alt={"icon"}/>
+                    </div>
+                )}
+                
+                <div style={childrenContainerStyle}>
+                    {children}
+                </div>
             </div>
         </div>
     )
+}
+
+function SessionItem({sessionModel}: { sessionModel: SessionModel }) {
+    const router = useRouter();
+
+    function onClick() {
+        router.push("/clinic/" + sessionModel.sessionId);
+    }
+
+    const sessionItemStyle: React.CSSProperties = {
+        cursor: 'pointer'
+    };
+
+    const sessionTextStyle: React.CSSProperties = {
+        cursor: 'pointer',
+        color: COLORS.newChatText,
+        fontSize: '1rem',
+        fontWeight: '300'
+    };
+
+    return (
+        <div style={sessionItemStyle} onClick={onClick}>
+            <p style={sessionTextStyle}>{sessionModel.sessionName}</p>
+        </div>
+    )
+}
+
+interface SessionModel {
+    sessionId: String,
+    sessionName: String
 }
