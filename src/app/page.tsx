@@ -18,7 +18,7 @@ export default function Home() {
     // Typography styles following the original design
     headingLarge: {
       fontFamily: "Public Sans, sans-serif",
-      fontSize: "clamp(2rem, 5vw, 4rem)", // Responsive font size
+      fontSize: "clamp(2rem, 4vw, 4rem)", // Responsive font size
       fontWeight: 300,
       lineHeight: "120%",
       letterSpacing: "-2%",
