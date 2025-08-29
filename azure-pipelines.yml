@@ -90,6 +90,6 @@ stages:
 
           echo " Deploying to Kubernetes cluster: ${{ parameters.environment }}"
           kubectl apply --validate=false -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
-          # kubectl apply -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
+          # kubectl apply -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }} .
 
       displayName: 'Deploy to OVH Kubernetes'
