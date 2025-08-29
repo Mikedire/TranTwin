@@ -6,7 +6,7 @@
 trigger: none
 pr: none # No pull request triggers
 
-# Runtime parameter for manual selection
+# Runtime parameter for manual selection.
 parameters:
 - name: environment
   displayName: "Target Environment"
