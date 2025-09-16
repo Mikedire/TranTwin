@@ -16,18 +16,18 @@ type Props = { title?: string; navbar?: ReactElement; children: ReactNode };
 export default function ShopLayout({ navbar, children }: Props) {
   return (
     <StyledAppLayout>
-      <Topbar />
+      {/* <Topbar />
 
       <Sticky fixedOn={0} scrollDistance={300}>
         <Header />
-      </Sticky>
+      </Sticky> */}
 
       {navbar ? <div className="section-after-sticky">{navbar}</div> : null}
       {navbar ? children : <div className="section-after-sticky">{children}</div>}
 
-      <MobileNavigationBar />
+      {/* <MobileNavigationBar /> */}
 
-      <Footer1 />
+      {/* <Footer1 /> */}
     </StyledAppLayout>
   );
 }

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dt-front-deployment
+  namespace: dev
+  labels:
+    app: dt-front
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dt-front
+  template:
+    metadata:
+      labels:
+        app: dt-front
+    spec:
+      containers:
+      - name: dt-front
+        image: u4c2j2w9.c1.gra9.container-registry.ovh.net/dto4t/dt-front:latest # Replace with your actual registry URL
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: production
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      imagePullSecrets:
+      - name: ovh-regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dt-front-service
+  namespace: dev
+spec:
+  type: LoadBalancer
+  selector:
+    app: dt-front
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+    nodePort: 30090 # You can pick any port between 30000–32767

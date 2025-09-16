@@ -1,0 +1,95 @@
+# trigger:
+#   branches:
+#     include:
+#     - none
+
+trigger: none
+pr: none # No pull request triggers
+
+# Runtime parameter for manual selection.
+parameters:
+- name: environment
+  displayName: "Target Environment"
+  type: string
+  default: staging
+  values:
+  - dev
+  - staging
+  - prod
+
+variables:
+- group: ovh-secrets
+- name: imageName
+  value: dt-front
+- name: imageTag
+  value: $(Build.BuildId)
+
+stages:
+- stage: BuildAndPush
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'Ubuntu-latest'
+    steps:
+    - checkout: self
+
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "🔐 Login to OVH registry"
+          echo $(REGISTRY_PASSWORD) | docker login $(REGISTRY_URL) -u $(REGISTRY_USERNAME) --password-stdin
+
+          echo "🐳 Build Docker image"
+          docker build -t $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag) .
+
+          echo "📤 Push Docker image"
+          docker push $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)
+
+- stage: Deploy
+  dependsOn: BuildAndPush
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'Ubuntu-latest'
+    steps:
+    - task: DownloadSecureFile@1
+      name: GetKubeconfig
+      inputs:
+        secureFile: 'kubeconfig-dto4t.yml'
+
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "📁 Setting up kubeconfig"
+          mkdir -p ~/.kube
+          cp $(GetKubeconfig.secureFilePath) ~/.kube/config
+          kubectl config use-context kubernetes-admin@DTO4T
+          kubectl config get-contexts
+
+          echo "🔐 Creating Docker registry secret in ${{ parameters.environment }} namespace"
+          kubectl create secret docker-registry ovh-regcred \
+            --docker-server=$(REGISTRY_URL) \
+            --docker-username=$(REGISTRY_USERNAME) \
+            --docker-password=$(REGISTRY_PASSWORD) \
+            --docker-email=$(REGISTRY_EMAIL) \
+            --namespace=${{ parameters.environment }} \
+            --dry-run=client -o yaml | kubectl apply --validate=false -f -
+            # --dry-run=client -o yaml | kubectl apply -f -
+
+          echo "📦 Preparing deployment manifest for ${{ parameters.environment }}"
+
+          if [ "${{ parameters.environment }}" = "prod" ]; then
+            sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
+              k8s/prod/deployment.yaml > k8s/rendered-deployment.yaml
+          else
+            sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
+              k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml
+          fi
+
+          echo " Deploying to Kubernetes cluster: ${{ parameters.environment }}"
+          kubectl apply --validate=false -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
+          # kubectl apply -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }} .
+
+      displayName: 'Deploy to OVH Kubernetes'

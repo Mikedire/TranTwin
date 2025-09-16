@@ -1,155 +1,341 @@
 "use client";
 
-import Box from "../Box";
-import Card from "../Card";
-import Badge from "../badge";
-import Icon from "../icon/Icon";
-import FlexBox from "../FlexBox";
-import NavLink from "../nav-link";
-import MenuItem from "../MenuItem";
-import { Button } from "../buttons";
-import Container from "../Container";
-import Typography, { Span } from "../Typography";
-import Categories from "../categories/Categories";
+import Image from "next/image";
+import React from "react";
+import { usePathname } from "next/navigation";
+// import { loginUrl, registerUrl } from "@/app/authUtils"
+import { useResponsive } from "@hook/useResponsive";
 
-import StyledNavbar from "./styles";
-import navbarNavigations from "@data/navbarNavigations";
+const NavBar = () => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const pathname = usePathname();
+  const { isMobile, isDesktop } = useResponsive();
 
-// ==============================================================
-interface Nav {
-  url: string;
-  child: Nav[];
-  title: string;
-  badge: string;
-  extLink?: boolean;
-}
+  // Define URLs for login and register (to be moved)
+  const loginUrl =
+    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
+  const registerUrl =
+    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
+  // Helper function to check if a link is active
+  const isActiveLink = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
 
-type NavbarProps = { navListOpen?: boolean };
-// ==============================================================
-
-export default function Navbar({ navListOpen }: NavbarProps) {
-  const renderNestedNav = (list: any[], isRoot = false) => {
-    return list?.map((nav: Nav) => {
-      if (isRoot) {
-        if (nav.url && nav.extLink) {
-          return (
-            <NavLink
-              href={nav.url}
-              key={nav.title}
-              target="_blank"
-              className="nav-link"
-              rel="noopener noreferrer">
-              {nav.badge ? (
-                <Badge style={{ marginRight: "0px" }} title={nav.badge}>
-                  {nav.title}
-                </Badge>
-              ) : (
-                <Span className="nav-link">{nav.title}</Span>
-              )}
-            </NavLink>
-          );
-        }
-
-        if (nav.child) {
-          return (
-            <FlexBox
-              className="root"
-              position="relative"
-              flexDirection="column"
-              alignItems="center"
-              key={nav.title}>
-              {nav.badge ? (
-                <Badge title={nav.badge}>{nav.title}</Badge>
-              ) : (
-                <Span className="nav-link">{nav.title}</Span>
-              )}
-              <div className="root-child">
-                <Card borderRadius={8} mt="1.25rem" py="0.5rem" boxShadow="large" minWidth="230px">
-                  {renderNestedNav(nav.child)}
-                </Card>
-              </div>
-            </FlexBox>
-          );
-        }
-
-        if (nav.url) {
-          return (
-            <NavLink className="nav-link" href={nav.url} key={nav.title}>
-              {nav.badge ? (
-                <Badge style={{ marginRight: "0px" }} title={nav.badge}>
-                  {nav.title}
-                </Badge>
-              ) : (
-                <Span className="nav-link">{nav.title}</Span>
-              )}
-            </NavLink>
-          );
-        }
-      } else {
-        if (nav.url) {
-          return (
-            <NavLink href={nav.url} key={nav.title}>
-              <MenuItem>
-                {nav.badge ? (
-                  <Badge style={{ marginRight: "0px" }} title={nav.badge}>
-                    {nav.title}
-                  </Badge>
-                ) : (
-                  <Span className="nav-link">{nav.title}</Span>
-                )}
-              </MenuItem>
-            </NavLink>
-          );
-        }
-
-        if (nav.child) {
-          return (
-            <Box className="parent" position="relative" minWidth="230px" key={nav.title}>
-              <MenuItem
-                color="gray.700"
-                style={{ display: "flex", justifyContent: "space-between" }}>
-                {nav.badge ? (
-                  <Badge style={{ marginRight: "0px" }} title={nav.badge}>
-                    {nav.title}
-                  </Badge>
-                ) : (
-                  <Span className="nav-link">{nav.title}</Span>
-                )}
-                <Icon size="8px" defaultcolor="currentColor">
-                  right-arrow
-                </Icon>
-              </MenuItem>
-
-              <Box className="child" pl="0.5rem">
-                <Card py="0.5rem" borderRadius={8} boxShadow="large" minWidth="230px">
-                  {renderNestedNav(nav.child)}
-                </Card>
-              </Box>
-            </Box>
-          );
-        }
-      }
-    });
+  // Styles object for better organization
+  const styles = {
+    nav: {
+      position: "fixed" as const,
+      top: isMobile ? "0px" : "40px",
+      left: isMobile ? "0px" : "60px",
+      right: isMobile ? "0px" : "60px",
+      width: isMobile ? "100%" : "calc(100% - 120px)",
+      height: isMobile ? "60px" : "80px",
+      backgroundColor: "white",
+      borderBottom: "4px solid #DBDADE",
+      borderRadius: isMobile ? "0px" : "6px",
+      paddingLeft: isMobile ? "16px" : "24px",
+      paddingRight: isMobile ? "16px" : "24px",
+      zIndex: 20,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    logo: {
+      color: "#0070F3",
+      fontSize: "24px",
+      fontFamily: "Public Sans, sans-serif",
+    },
+    logoImage: {
+      width: "auto",
+      height: "auto",
+    },
+    mobileMenuButton: {
+      display: isMobile ? "block" : "none",
+      marginLeft: "auto",
+      marginRight: "16px",
+      color: "#0070F3",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+    },
+    desktopNavContainer: {
+      display: isMobile ? "none" : "flex",
+      alignItems: "center",
+      gap: "24px",
+      position: "absolute" as const,
+      left: "50%",
+      transform: "translateX(-50%)",
+    },
+    navLink: (isActive: boolean) => ({
+      color: "#0070F3",
+      fontSize: "14px",
+      textDecoration: "none",
+      transition: "color 0.3s ease",
+      position: "relative" as const,
+      paddingBottom: "4px",
+      borderBottom: isActive ? "2px solid #0070F3" : "none",
+    }),
+    desktopButtonsContainer: {
+      display: isMobile ? "none" : "flex",
+      marginLeft: "auto",
+      alignItems: "center",
+      gap: "16px",
+    },
+    globeIcon: {
+      width: "32px",
+      height: "32px",
+    },
+    buttonGroup: {
+      display: "flex",
+      alignItems: "center",
+      gap: "24px",
+    },
+    signInButton: {
+      backgroundColor: "white",
+      color: "#0070F3",
+      fontSize: "15px",
+      paddingTop: "6px",
+      paddingBottom: "6px",
+      paddingLeft: "24px",
+      paddingRight: "24px",
+      borderRadius: "6px",
+      border: "1px solid #0070F3",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease",
+      whiteSpace: "nowrap" as const,
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    getStartedButton: {
+      backgroundColor: "#2563eb",
+      color: "white",
+      fontSize: "15px",
+      paddingTop: "6px",
+      paddingBottom: "6px",
+      paddingLeft: "24px",
+      paddingRight: "24px",
+      borderRadius: "6px",
+      border: "none",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease",
+      whiteSpace: "nowrap" as const,
+    },
+    mobileMenu: {
+      display: isMenuOpen && isMobile ? "flex" : "none",
+      position: "absolute" as const,
+      top: "60px",
+      left: "0",
+      right: "0",
+      backgroundColor: "white",
+      borderBottom: "4px solid #DBDADE",
+      padding: "16px",
+      flexDirection: "column" as const,
+      gap: "16px",
+      boxShadow:
+        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    },
+    mobileNavLink: {
+      color: "#0070F3",
+      fontSize: "16px",
+      textDecoration: "none",
+      transition: "color 0.3s ease",
+      paddingTop: "8px",
+      paddingBottom: "8px",
+    },
+    mobileButtonGroup: {
+      display: "flex",
+      flexDirection: "column" as const,
+      gap: "12px",
+      paddingTop: "8px",
+    },
+    mobileSignInButton: {
+      backgroundColor: "white",
+      color: "#0070F3",
+      fontSize: "15px",
+      paddingTop: "6px",
+      paddingBottom: "6px",
+      paddingLeft: "24px",
+      paddingRight: "24px",
+      borderRadius: "6px",
+      border: "1px solid #0070F3",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease",
+      whiteSpace: "nowrap" as const,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    mobileGetStartedButton: {
+      backgroundColor: "#2563eb",
+      color: "white",
+      fontSize: "15px",
+      paddingTop: "6px",
+      paddingBottom: "6px",
+      paddingLeft: "24px",
+      paddingRight: "24px",
+      borderRadius: "6px",
+      border: "none",
+      cursor: "pointer",
+      transition: "background-color 0.3s ease",
+      whiteSpace: "nowrap" as const,
+    },
   };
 
   return (
-    <StyledNavbar>
-      <Container height="100%" display="flex" alignItems="center" justifyContent="space-between">
-        <Categories open={navListOpen}>
-          <Button width="278px" height="40px" bg="body.default" variant="text">
-            <Icon>categories</Icon>
-            <Typography ml="10px" flex="1 1 0" fontWeight="600" textAlign="left" color="text.muted">
-              Categories
-            </Typography>
+    <nav style={styles.nav}>
+      <div style={styles.logo}>
+        <img
+          src="/images/Vector%20(1).png"
+          alt="DTO4T"
+          style={styles.logoImage}
+        />
+      </div>
 
-            <Icon className="dropdown-icon" variant="small">
-              chevron-right
-            </Icon>
-          </Button>
-        </Categories>
+      {/* Mobile menu button */}
+      <button
+        style={styles.mobileMenuButton}
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ height: "24px", width: "24px" }}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+          />
+        </svg>
+      </button>
 
-        <FlexBox style={{ gap: 32 }}>{renderNestedNav(navbarNavigations, true)}</FlexBox>
-      </Container>
-    </StyledNavbar>
+      {/* Desktop nav links */}
+      <div style={styles.desktopNavContainer}>
+        <a
+          href="/"
+          style={styles.navLink(isActiveLink("/"))}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#1d4ed8")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#0070F3")}
+        >
+          Home
+        </a>
+        <a
+          href="/clinic"
+          style={styles.navLink(isActiveLink("/clinic"))}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#1d4ed8")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#0070F3")}
+        >
+          Diagnose
+        </a>
+        <a
+          href="#"
+          style={styles.navLink(isActiveLink("/insight"))}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#1d4ed8")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#0070F3")}
+        >
+          Insight
+        </a>
+      </div>
+
+      {/* Desktop buttons */}
+      <div style={styles.desktopButtonsContainer}>
+        <Image
+          src="/icons/globe.svg"
+          alt="DTO4T Logo"
+          width={32}
+          height={32}
+          style={styles.globeIcon}
+        />
+        <div style={styles.buttonGroup}>
+          <button
+            style={styles.signInButton}
+            onClick={() => (window.location.href = loginUrl)}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#dbeafe")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "white")
+            }
+          >
+            Sign In
+          </button>
+          <button
+            style={styles.getStartedButton}
+            onClick={() => (window.location.href = registerUrl)}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#0070F3")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#2563eb")
+            }
+          >
+            Get Started
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div style={styles.mobileMenu}>
+        <a
+          href="#"
+          style={styles.mobileNavLink}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#93c5fd")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#0070F3")}
+        >
+          Home
+        </a>
+        <a
+          href="/clinic"
+          style={styles.mobileNavLink}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#93c5fd")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#0070F3")}
+        >
+          DBP Clinic
+        </a>
+        <a
+          href="#"
+          style={styles.mobileNavLink}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#93c5fd")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#0070F3")}
+        >
+          Insight
+        </a>
+        <div style={styles.mobileButtonGroup}>
+          <button
+            style={styles.mobileSignInButton}
+            onClick={() => (window.location.href = loginUrl)}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#dbeafe")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "white")
+            }
+          >
+            <span>Sign In</span>
+          </button>
+          <button
+            style={styles.mobileGetStartedButton}
+            onClick={() => (window.location.href = registerUrl)}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#0070F3")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#2563eb")
+            }
+          >
+            Get Started
+          </button>
+        </div>
+      </div>
+    </nav>
   );
-}
+};
+
+export default NavBar;
