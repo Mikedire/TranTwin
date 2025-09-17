@@ -20,11 +20,7 @@ stages:
         cliSources: '.'
         extraProperties: |
           sonar.sourceEncoding=UTF-8
-          sonar.branch.name=
-          sonar.projectKey=DQ_PRODUCTS_DTO4T_dcbcc6f9-1d39-4012-b50e-e568be13b7a8
-          sonar.projectName=DTO4T
-          sonar.sources=.
-
+          sonar.branch.name=   # 👈 clears the branch property
 
     - task: SonarQubeAnalyze@7
 
