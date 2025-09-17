@@ -4,9 +4,12 @@ trigger:
 # trigger: none
 # pr: none # No pull request triggers
 
-pool:
-  name: 'DQSelfAgent'
+# pool:
+#   name: 'DQSelfAgent'
 
+pool:
+      vmImage: 'Windows-latest'
+      
 stages:
 - stage: BuildAndAnalyze
   displayName: "Build and SonarQube Analysis"
