@@ -10,9 +10,10 @@ stages:
   jobs:
   - job: Build
     steps:
+    # 1. Prepare Analysis Configuration
     - task: SonarQubePrepare@7
       inputs:
-        SonarQube: 'sonar-products'
+        SonarQube: 'sonar-products'   # must match service connection name
         scannerMode: 'cli'
         configMode: 'manual'
         cliProjectKey: 'DQ_PRODUCTS_DTO4T_dcbcc6f9-1d39-4012-b50e-e568be13b7a8'
@@ -21,8 +22,25 @@ stages:
         extraProperties: |
           sonar.sourceEncoding=UTF-8
 
+    # 2. Setup Node.js (match your Node version, e.g. 18.x)
+    - task: UseNode@1
+      inputs:
+        version: '18.x'
+
+    # 3. Install dependencies
+    - script: |
+        npm ci
+      displayName: "Install dependencies"
+
+    # 4. Build Next.js project
+    - script: |
+        npm run build
+      displayName: "Build project"
+
+    # 5. Run Code Analysis
     - task: SonarQubeAnalyze@7
 
+    # 6. Publish Quality Gate Result
     - task: SonarQubePublish@7
       inputs:
         pollingTimeoutSec: '300'
