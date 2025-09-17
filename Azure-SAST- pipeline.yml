@@ -20,7 +20,6 @@ stages:
         cliSources: '.'
         extraProperties: |
           sonar.sourceEncoding=UTF-8
-          sonar.branch.name=   # 👈 clears the branch property
 
     - task: SonarQubeAnalyze@7
 
