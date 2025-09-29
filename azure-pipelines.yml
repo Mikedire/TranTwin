@@ -1,96 +1,74 @@
-# trigger:
-#   branches:
-#     include:
-#     - none
+# Rollback Plan for Kubernetes Deployment
+# This pipeline extends the original pipeline with a rollback stage to revert to a previous stable image version if the deployment fails or is unstable.
 
-trigger: none
-pr: none # No pull request triggers
-
-# Runtime parameter for manual selection.
 parameters:
-- name: environment
-  displayName: "Target Environment"
-  type: string
-  default: staging
-  values:
-  - dev
-  - staging
-  - prod
-
-variables:
-- group: ovh-secrets
-- name: imageName
-  value: dt-front
-- name: imageTag
-  value: $(Build.BuildId)
+  - name: environment
+    displayName: "Target Environment"
+    type: string
+    default: staging
+    values:
+      - dev
+      - staging
+      - prod
+  - name: rollbackImageTag
+    displayName: "Rollback Image Tag (e.g., previous Build ID)"
+    type: string
+    default: ''
 
 stages:
-- stage: BuildAndPush
-  jobs:
-  - job: Build
-    pool:
-      vmImage: 'Ubuntu-latest'
-    steps:
-    - checkout: self
+  - stage: Rollback
+    condition: or(failed(), eq(variables['Build.Reason'], 'Manual'))
+    jobs:
+      - job: RollbackDeployment
+        pool:
+          vmImage: 'Ubuntu-latest'
+        steps:
+          - task: DownloadSecureFile@1
+            name: GetKubeconfig
+            inputs:
+              secureFile: 'kubeconfig-dto4t.yml'
+            displayName: 'Download kubeconfig'
 
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo "🔐 Login to OVH registry"
-          echo $(REGISTRY_PASSWORD) | docker login $(REGISTRY_URL) -u $(REGISTRY_USERNAME) --password-stdin
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "📁 Setting up kubeconfig"
+                mkdir -p ~/.kube
+                cp $(GetKubeconfig.secureFilePath) ~/.kube/config
+                kubectl config use-context kubernetes-admin@DTO4T
+                kubectl config get-contexts
 
-          echo "🐳 Build Docker image"
-          docker build -t $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag) .
+                echo "🔄 Checking for rollback image tag"
+                if [ -z "${{ parameters.rollbackImageTag }}" ]; then
+                  echo "❌ Error: Rollback image tag not provided. Please specify a valid tag."
+                  exit 1
+                fi
 
-          echo "📤 Push Docker image"
-          docker push $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)
+                echo "🔐 Ensuring Docker registry secret exists in ${{ parameters.environment }} namespace"
+                kubectl create secret docker-registry ovh-regcred \
+                  --docker-server=$(REGISTRY_URL) \
+                  --docker-username=$(REGISTRY_USERNAME) \
+                  --docker-password=$(REGISTRY_PASSWORD) \
+                  --docker-email=$(REGISTRY_EMAIL) \
+                  --namespace=${{ parameters.environment }} \
+                  --dry-run=client -o yaml | kubectl apply --validate=false -f -
 
-- stage: Deploy
-  dependsOn: BuildAndPush
-  jobs:
-  - job: Deploy
-    pool:
-      vmImage: 'Ubuntu-latest'
-    steps:
-    - task: DownloadSecureFile@1
-      name: GetKubeconfig
-      inputs:
-        secureFile: 'kubeconfig-dto4t.yml'
+                echo "📦 Preparing rollback deployment manifest for ${{ parameters.environment }}"
+                if [ "${{ parameters.environment }}" = "prod" ]; then
+                  sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/dt-front:${{ parameters.rollbackImageTag }}|" \
+                    k8s/prod/deployment.yaml > k8s/rendered-rollback-deployment.yaml
+                else
+                  sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/dt-front:${{ parameters.rollbackImageTag }}|" \
+                    k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-rollback-deployment.yaml
+                fi
 
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo "📁 Setting up kubeconfig"
-          mkdir -p ~/.kube
-          cp $(GetKubeconfig.secureFilePath) ~/.kube/config
-          kubectl config use-context kubernetes-admin@DTO4T
-          kubectl config get-contexts
-
-          echo "🔐 Creating Docker registry secret in ${{ parameters.environment }} namespace"
-          kubectl create secret docker-registry ovh-regcred \
-            --docker-server=$(REGISTRY_URL) \
-            --docker-username=$(REGISTRY_USERNAME) \
-            --docker-password=$(REGISTRY_PASSWORD) \
-            --docker-email=$(REGISTRY_EMAIL) \
-            --namespace=${{ parameters.environment }} \
-            --dry-run=client -o yaml | kubectl apply --validate=false -f -
-            # --dry-run=client -o yaml | kubectl apply -f -
-
-          echo "📦 Preparing deployment manifest for ${{ parameters.environment }}"
-
-          if [ "${{ parameters.environment }}" = "prod" ]; then
-            sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
-              k8s/prod/deployment.yaml > k8s/rendered-deployment.yaml
-          else
-            sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
-              k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml
-          fi
-
-          echo " Deploying to Kubernetes cluster: ${{ parameters.environment }}"
-          kubectl apply --validate=false -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
-          # kubectl apply -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }} .
-
-      displayName: 'Deploy to OVH Kubernetes'
-      
+                echo "🔄 Rolling back to image: $(REGISTRY_URL)/dto4t/dt-front:${{ parameters.rollbackImageTag }} in ${{ parameters.environment }}"
+                kubectl apply --validate=false -f k8s/rendered-rollback-deployment.yaml -n ${{ parameters.environment }}
+                if [ $? -eq 0 ]; then
+                  echo "✅ Rollback successful"
+                else
+                  echo "❌ Rollback failed"
+                  exit 1
+                fi
+            displayName: 'Rollback Deployment to Previous Image'
