@@ -93,3 +93,4 @@ stages:
           # kubectl apply -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }} .
 
       displayName: 'Deploy to OVH Kubernetes'
+      
