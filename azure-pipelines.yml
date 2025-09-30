@@ -1,150 +1,136 @@
-# Azure DevOps pipeline with build, deploy, and rollback stages
+# trigger:
+#   branches:
+#     include:
+#     - none
+
 trigger: none
 pr: none # No pull request triggers
 
-# Runtime parameter for manual selection
+# Runtime parameter for manual selection.
 parameters:
-  - name: environment
-    displayName: "Target Environment"
-    type: string
-    default: staging
-    values:
-      - dev
-      - staging
-      - prod
-  - name: rollbackImageTag
-    displayName: "Rollback Image Tag (e.g., previous Build ID)"
-    type: string
-    default: ''
+- name: environment
+  displayName: "Target Environment"
+  type: string
+  default: staging
+  values:
+  - dev
+  - staging
+  - prod
 
 variables:
-  - group: ovh-secrets
-  - name: imageName
-    value: dt-front
-  - name: imageTag
-    value: $(Build.BuildId)
+- group: ovh-secrets
+- name: imageName
+  value: dt-front
+- name: imageTag
+  value: $(Build.BuildId)
 
 stages:
-  - stage: BuildAndPush
-    jobs:
-      - job: Build
-        pool:
-          vmImage: 'Ubuntu-latest'
-        steps:
-          - checkout: self
+# -------------------------
+# Stage 1: Build & Push
+# -------------------------
+- stage: BuildAndPush
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'Ubuntu-latest'
+    steps:
+    - checkout: self
 
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              script: |
-                echo "🔐 Login to OVH registry"
-                echo $(REGISTRY_PASSWORD) | docker login $(REGISTRY_URL) -u $(REGISTRY_USERNAME) --password-stdin
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "🔐 Login to OVH registry"
+          echo $(REGISTRY_PASSWORD) | docker login $(REGISTRY_URL) -u $(REGISTRY_USERNAME) --password-stdin
 
-                echo "🐳 Build Docker image"
-                docker build -t $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag) .
+          echo "🐳 Build Docker image"
+          docker build -t $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag) .
 
-                echo "📤 Push Docker image"
-                docker push $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)
-            displayName: 'Build and Push Docker Image'
+          echo "📤 Push Docker image"
+          docker push $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)
 
-  - stage: Deploy
-    dependsOn: BuildAndPush
-    jobs:
-      - job: Deploy
-        pool:
-          vmImage: 'Ubuntu-latest'
-        steps:
-          - task: DownloadSecureFile@1
-            name: GetKubeconfig
-            inputs:
-              secureFile: 'kubeconfig-dto4t.yml'
-            displayName: 'Download kubeconfig'
+# -------------------------
+# Stage 2: Deploy
+# -------------------------
+- stage: Deploy
+  dependsOn: BuildAndPush
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'Ubuntu-latest'
+    steps:
+    - task: DownloadSecureFile@1
+      name: GetKubeconfig
+      inputs:
+        secureFile: 'kubeconfig-dto4t.yml'
 
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              script: |
-                echo "📁 Setting up kubeconfig"
-                mkdir -p ~/.kube
-                cp $(GetKubeconfig.secureFilePath) ~/.kube/config
-                kubectl config use-context kubernetes-admin@DTO4T
-                kubectl config get-contexts
+    - task: Bash@3
+      name: DeployApp
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "📁 Setting up kubeconfig"
+          mkdir -p ~/.kube
+          cp $(GetKubeconfig.secureFilePath) ~/.kube/config
+          kubectl config use-context kubernetes-admin@DTO4T
+          kubectl config get-contexts
 
-                echo "🔐 Creating Docker registry secret in ${{ parameters.environment }} namespace"
-                kubectl create secret docker-registry ovh-regcred \
-                  --docker-server=$(REGISTRY_URL) \
-                  --docker-username=$(REGISTRY_USERNAME) \
-                  --docker-password=$(REGISTRY_PASSWORD) \
-                  --docker-email=$(REGISTRY_EMAIL) \
-                  --namespace=${{ parameters.environment }} \
-                  --dry-run=client -o yaml | kubectl apply --validate=false -f -
+          echo "🔐 Creating Docker registry secret in ${{ parameters.environment }} namespace"
+          kubectl create secret docker-registry ovh-regcred \
+            --docker-server=$(REGISTRY_URL) \
+            --docker-username=$(REGISTRY_USERNAME) \
+            --docker-password=$(REGISTRY_PASSWORD) \
+            --docker-email=$(REGISTRY_EMAIL) \
+            --namespace=${{ parameters.environment }} \
+            --dry-run=client -o yaml | kubectl apply --validate=false -f -
 
-                echo "📦 Preparing deployment manifest for ${{ parameters.environment }}"
-                if [ "${{ parameters.environment }}" = "prod" ]; then
-                  sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
-                    k8s/prod/deployment.yaml > k8s/rendered-deployment.yaml
-                else
-                  sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
-                    k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml
-                fi
+          echo "📦 Preparing deployment manifest for ${{ parameters.environment }}"
 
-                echo "📦 Deploying to Kubernetes cluster: ${{ parameters.environment }}"
-                kubectl apply --validate=false -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
-            displayName: 'Deploy to OVH Kubernetes'
+          if [ "${{ parameters.environment }}" = "prod" ]; then
+            sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
+              k8s/prod/deployment.yaml > k8s/rendered-deployment.yaml
+          else
+            sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
+              k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml
+          fi
 
-  - stage: Rollback
-    condition: or(failed(), eq(variables['Build.Reason'], 'Manual'))
-    jobs:
-      - job: RollbackDeployment
-        pool:
-          vmImage: 'Ubuntu-latest'
-        steps:
-          - task: DownloadSecureFile@1
-            name: GetKubeconfig
-            inputs:
-              secureFile: 'kubeconfig-dto4t.yml'
-            displayName: 'Download kubeconfig'
+          echo "🚀 Deploying to Kubernetes cluster: ${{ parameters.environment }}"
+          kubectl apply --validate=false -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
 
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              script: |
-                echo "📁 Setting up kubeconfig"
-                mkdir -p ~/.kube
-                cp $(GetKubeconfig.secureFilePath) ~/.kube/config
-                kubectl config use-context kubernetes-admin@DTO4T
-                kubectl config get-contexts
+          echo "⏳ Waiting for rollout to finish..."
+          if ! kubectl rollout status deployment/dt-front -n ${{ parameters.environment }} --timeout=60s; then
+            echo "❌ Deployment failed, marking job as failed."
+            exit 1
+          fi
 
-                echo "🔄 Checking for rollback image tag"
-                if [ -z "${{ parameters.rollbackImageTag }}" ]; then
-                  echo "❌ Error: Rollback image tag not provided. Please specify a valid tag."
-                  exit 1
-                fi
+      displayName: 'Deploy to OVH Kubernetes'
 
-                echo "🔐 Ensuring Docker registry secret exists in ${{ parameters.environment }} namespace"
-                kubectl create secret docker-registry ovh-regcred \
-                  --docker-server=$(REGISTRY_URL) \
-                  --docker-username=$(REGISTRY_USERNAME) \
-                  --docker-password=$(REGISTRY_PASSWORD) \
-                  --docker-email=$(REGISTRY_EMAIL) \
-                  --namespace=${{ parameters.environment }} \
-                  --dry-run=client -o yaml | kubectl apply --validate=false -f -
+# -------------------------
+# Stage 3: Rollback (only runs if Deploy fails)
+# -------------------------
+- stage: Rollback
+  dependsOn: Deploy
+  condition: failed()   # run only if Deploy fails
+  jobs:
+  - job: RollbackJob
+    pool:
+      vmImage: 'Ubuntu-latest'
+    steps:
+    - task: DownloadSecureFile@1
+      name: GetKubeconfig
+      inputs:
+        secureFile: 'kubeconfig-dto4t.yml'
 
-                echo "📦 Preparing rollback deployment manifest for ${{ parameters.environment }}"
-                if [ "${{ parameters.environment }}" = "prod" ]; then
-                  sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/dt-front:${{ parameters.rollbackImageTag }}|" \
-                    k8s/prod/deployment.yaml > k8s/rendered-rollback-deployment.yaml
-                else
-                  sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/dt-front:${{ parameters.rollbackImageTag }}|" \
-                    k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-rollback-deployment.yaml
-                fi
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "📁 Setting up kubeconfig"
+          mkdir -p ~/.kube
+          cp $(GetKubeconfig.secureFilePath) ~/.kube/config
+          kubectl config use-context kubernetes-admin@DTO4T
 
-                echo "🔄 Rolling back to image: $(REGISTRY_URL)/dto4t/dt-front:${{ parameters.rollbackImageTag }} in ${{ parameters.environment }}"
-                kubectl apply --validate=false -f k8s/rendered-rollback-deployment.yaml -n ${{ parameters.environment }}
-                if [ $? -eq 0 ]; then
-                  echo "✅ Rollback successful"
-                else
-                  echo "❌ Rollback failed"
-                  exit 1
-                fi
-            displayName: 'Rollback Deployment to Previous Image'
+          echo "♻️ Rolling back deployment in ${{ parameters.environment }} namespace"
+          kubectl rollout undo deployment/dt-front -n ${{ parameters.environment }}
+
+      displayName: 'Rollback Deployment'
