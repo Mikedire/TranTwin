@@ -1,0 +1,1 @@
+# remote state storage (Azure storage or OVH S3)
