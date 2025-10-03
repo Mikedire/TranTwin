@@ -25,9 +25,6 @@ variables:
   value: $(Build.BuildId)
 
 stages:
-# -------------------------
-# Stage 1: Build & Push
-# -------------------------
 - stage: BuildAndPush
   jobs:
   - job: Build
@@ -49,9 +46,6 @@ stages:
           echo "📤 Push Docker image"
           docker push $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)
 
-# -------------------------
-# Stage 2: Deploy
-# -------------------------
 - stage: Deploy
   dependsOn: BuildAndPush
   jobs:
@@ -65,7 +59,6 @@ stages:
         secureFile: 'kubeconfig-dto4t.yml'
 
     - task: Bash@3
-      name: DeployApp
       inputs:
         targetType: 'inline'
         script: |
@@ -83,6 +76,7 @@ stages:
             --docker-email=$(REGISTRY_EMAIL) \
             --namespace=${{ parameters.environment }} \
             --dry-run=client -o yaml | kubectl apply --validate=false -f -
+            # --dry-run=client -o yaml | kubectl apply -f -
 
           echo "📦 Preparing deployment manifest for ${{ parameters.environment }}"
 
@@ -94,43 +88,8 @@ stages:
               k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml
           fi
 
-          echo "🚀 Deploying to Kubernetes cluster: ${{ parameters.environment }}"
+          echo " Deploying to Kubernetes cluster: ${{ parameters.environment }}"
           kubectl apply --validate=false -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }}
-
-          echo "⏳ Waiting for rollout to finish..."
-          if ! kubectl rollout status deployment/dt-front -n ${{ parameters.environment }} --timeout=60s; then
-            echo "❌ Deployment failed, marking job as failed."
-            exit 1
-          fi
+          # kubectl apply -f k8s/rendered-deployment.yaml -n ${{ parameters.environment }} .
 
       displayName: 'Deploy to OVH Kubernetes'
-
-# -------------------------
-# Stage 3: Rollback (only runs if Deploy fails)
-# -------------------------
-- stage: Rollback
-  dependsOn: Deploy
-  condition: failed()   # run only if Deploy fails
-  jobs:
-  - job: RollbackJob
-    pool:
-      vmImage: 'Ubuntu-latest'
-    steps:
-    - task: DownloadSecureFile@1
-      name: GetKubeconfig
-      inputs:
-        secureFile: 'kubeconfig-dto4t.yml'
-
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo "📁 Setting up kubeconfig"
-          mkdir -p ~/.kube
-          cp $(GetKubeconfig.secureFilePath) ~/.kube/config
-          kubectl config use-context kubernetes-admin@DTO4T
-
-          echo "♻️ Rolling back deployment in ${{ parameters.environment }} namespace"
-          kubectl rollout undo deployment/dt-front -n ${{ parameters.environment }}
-
-      displayName: 'Rollback Deployment'
