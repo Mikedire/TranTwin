@@ -36,9 +36,10 @@ stages:
         script: |
           echo "🔧 Installing Terraform"
           sudo apt-get update && sudo apt-get install -y wget unzip
-          wget https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip
-          unzip terraform_1.9.5_linux_amd64.zip
-          sudo mv terraform /usr/local/bin/
+          wget -q -O /tmp/terraform.zip https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip
+          unzip -o /tmp/terraform.zip -d /tmp
+          sudo mv /tmp/terraform /usr/local/bin/terraform
+          terraform -version
 
     # 3. Setup kubeconfig
     - task: Bash@3
