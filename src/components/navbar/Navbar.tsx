@@ -187,11 +187,7 @@ const NavBar = () => {
   return (
     <nav style={styles.nav}>
       <div style={styles.logo}>
-        <img
-          src="/images/Vector%20(1).png"
-          alt="TranTwin"
-          style={styles.logoImage}
-        />
+        <span style={{ fontWeight: 700 }}>TranTwin</span>
       </div>
 
       {/* Mobile menu button */}

@@ -231,11 +231,16 @@ const Footer = () => {
           {/* Newsletter Subscription */}
           <div style={styles.newsletterSection}>
             {/* Image Section */}
-            <img
-              src="/images/Vector.png"
-              alt="TranTwin"
-              style={styles.logoImage}
-            />
+            <span
+              style={{
+                fontFamily: "Public Sans, sans-serif",
+                fontWeight: 700,
+                fontSize: "28px",
+                color: "#4B465C",
+              }}
+            >
+              TranTwin
+            </span>
             {/* Text Section */}
             <p style={styles.newsletterText}>
               Subscribe to our newsletter to receive the latest

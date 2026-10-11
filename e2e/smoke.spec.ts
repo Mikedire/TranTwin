@@ -7,6 +7,14 @@ test.describe("TranTwin storefront smoke", () => {
     await expect(page).toHaveTitle(/TranTwin/i);
   });
 
+  test("header and footer show the TranTwin brand, never DTO4T", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByText("TranTwin").first()).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("DTO4T");
+  });
+
   test("a shop landing route loads", async ({ page }) => {
     const res = await page.goto("/grocery-1");
     expect(res?.ok()).toBeTruthy();
