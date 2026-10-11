@@ -16,8 +16,8 @@ stages:
         SonarQube: 'sonar-products'   # must match service connection name
         scannerMode: 'cli'
         configMode: 'manual'
-        cliProjectKey: 'DQ_PRODUCTS_DTO4T_dcbcc6f9-1d39-4012-b50e-e568be13b7a8'
-        cliProjectName: 'DTO4T'
+        cliProjectKey: 'DQ_PRODUCTS_TRANTWIN_dcbcc6f9-1d39-4012-b50e-e568be13b7a8'
+        cliProjectName: 'TranTwin'
         cliSources: '.'
         extraProperties: |
           sonar.sourceEncoding=UTF-8

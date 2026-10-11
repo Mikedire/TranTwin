@@ -25,8 +25,8 @@ export default function Header() {
 
   const toggleSidenav = () => setOpen((open) => !open);
 
-  const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
-  const registerUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
+  const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
+  const registerUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
 
   const scrollListener = useCallback(
     debounce(() => {

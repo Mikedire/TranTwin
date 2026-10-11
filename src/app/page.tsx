@@ -86,8 +86,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>DTO4T Landing Page</title>
-        <meta name="description" content="DTO4T Landing Page" />
+        <title>TranTwin Landing Page</title>
+        <meta name="description" content="TranTwin Landing Page" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

@@ -44,10 +44,10 @@ stages:
           echo $(REGISTRY_PASSWORD) | docker login $(REGISTRY_URL) -u $(REGISTRY_USERNAME) --password-stdin
 
           echo "🐳 Build Docker image"
-          docker build -t $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag) .
+          docker build -t $(REGISTRY_URL)/trantwin/$(imageName):$(imageTag) .
 
           echo "📤 Push Docker image"
-          docker push $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)
+          docker push $(REGISTRY_URL)/trantwin/$(imageName):$(imageTag)
 
 # -------------------------
 # Stage 2: Deploy
@@ -62,7 +62,7 @@ stages:
     - task: DownloadSecureFile@1
       name: GetKubeconfig
       inputs:
-        secureFile: 'kubeconfig-dto4t.yml'
+        secureFile: 'kubeconfig-trantwin.yml'
 
     - task: Bash@3
       name: DeployApp
@@ -72,7 +72,7 @@ stages:
           echo "📁 Setting up kubeconfig"
           mkdir -p ~/.kube
           cp $(GetKubeconfig.secureFilePath) ~/.kube/config
-          kubectl config use-context kubernetes-admin@DTO4T
+          kubectl config use-context kubernetes-admin@TranTwin
           kubectl config get-contexts
 
           echo "🔐 Creating Docker registry secret in ${{ parameters.environment }} namespace"
@@ -87,10 +87,10 @@ stages:
           echo "📦 Preparing deployment manifest for ${{ parameters.environment }}"
 
           if [ "${{ parameters.environment }}" = "prod" ]; then
-            sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
+            sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/trantwin/$(imageName):$(imageTag)|" \
               k8s/prod/deployment.yaml > k8s/rendered-deployment.yaml
           else
-            sed "s|image: .*$|image: $(REGISTRY_URL)/dto4t/$(imageName):$(imageTag)|" \
+            sed "s|image: .*$|image: $(REGISTRY_URL)/trantwin/$(imageName):$(imageTag)|" \
               k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml
           fi
 
@@ -119,7 +119,7 @@ stages:
     - task: DownloadSecureFile@1
       name: GetKubeconfig
       inputs:
-        secureFile: 'kubeconfig-dto4t.yml'
+        secureFile: 'kubeconfig-trantwin.yml'
 
     - task: Bash@3
       inputs:
@@ -128,7 +128,7 @@ stages:
           echo "📁 Setting up kubeconfig"
           mkdir -p ~/.kube
           cp $(GetKubeconfig.secureFilePath) ~/.kube/config
-          kubectl config use-context kubernetes-admin@DTO4T
+          kubectl config use-context kubernetes-admin@TranTwin
 
           echo "♻️ Rolling back deployment in ${{ parameters.environment }} namespace"
           kubectl rollout undo deployment/dt-front -n ${{ parameters.environment }}

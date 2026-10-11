@@ -233,7 +233,7 @@ const Footer = () => {
             {/* Image Section */}
             <img
               src="/images/Vector.png"
-              alt="DTO4T"
+              alt="TranTwin"
               style={styles.logoImage}
             />
             {/* Text Section */}
@@ -330,7 +330,7 @@ const Footer = () => {
                       (e.currentTarget.style.textDecoration = "none")
                     }
                   >
-                    About DTO4T
+                    About TranTwin
                   </a>
                 </li>
                 <li>
@@ -419,7 +419,7 @@ const Footer = () => {
       {/* Copyright Section */}
       <section style={styles.copyrightSection}>
         <p style={styles.copyrightText}>
-          &copy; <span style={styles.yearSpan}>2024</span> DTO4T
+          &copy; <span style={styles.yearSpan}>2024</span> TranTwin
         </p>
         {/* Social Media Links */}
         <div style={styles.socialLinks}>

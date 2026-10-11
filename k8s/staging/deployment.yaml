@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: dt-front
-        image: u4c2j2w9.c1.gra9.container-registry.ovh.net/dto4t/dt-front:latest # Replace with your actual registry URL
+        image: u4c2j2w9.c1.gra9.container-registry.ovh.net/trantwin/dt-front:latest # Replace with your actual registry URL
         ports:
         - containerPort: 3000
         env:

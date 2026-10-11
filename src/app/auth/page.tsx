@@ -11,13 +11,13 @@ function Content() {
     const searchParams = useSearchParams()
     const code = searchParams.get('code')
     const error = searchParams.get('error')
-    const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/B2C_1_DTO4T_Login/oauth2/v2.0/token" //tenant dgqatalyst
+    const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/B2C_1_TranTwin_Login/oauth2/v2.0/token" //tenant dgqatalyst
     const client_id = "a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e"
     const client_secret = "9Gp8Q~nO5I2QcK~fCLAqQuQd1lWRcUUzF1~1HbfX"
     const redirect_url = "http://localhost:3000/auth"
     const scope = "openid profile"
-    const registerUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/B2C_1_DTO4T_Register/oauth2/v2.0/token"
-    const passwordResetUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/B2C_1_DTO4T_PasswordReset/oauth2/v2.0/token"
+    const registerUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/B2C_1_TranTwin_Register/oauth2/v2.0/token"
+    const passwordResetUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/B2C_1_TranTwin_PasswordReset/oauth2/v2.0/token"
 
     const requestBody = {
         client_id: client_id,
@@ -34,7 +34,7 @@ function Content() {
         if (!error) return;
         // Handle error
         if (error === "access_denied") {
-            window.location.href = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_PasswordReset&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
+            window.location.href = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_PasswordReset&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
             console.error("Access denied by user");
         } else if (error === "invalid_request") {
             console.error("Invalid request, possibly due to missing parameters");

@@ -287,7 +287,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
                 <div style={sidebarStyle}>
                     <div style={sidebarHeaderStyle}>
                         <Image 
-                            src={"/icons/dto4t_logo.svg"} 
+                            src={"/icons/trantwin_logo.svg"} 
                             width={94} 
                             height={24} 
                             alt={"logo"}

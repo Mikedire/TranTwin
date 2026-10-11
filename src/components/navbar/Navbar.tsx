@@ -13,9 +13,9 @@ const NavBar = () => {
 
   // Define URLs for login and register (to be moved)
   const loginUrl =
-    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
+    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
   const registerUrl =
-    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_DTO4T_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
+    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
   // Helper function to check if a link is active
   const isActiveLink = (href: string) => {
     if (href === "/") {
@@ -190,7 +190,7 @@ const NavBar = () => {
       <div style={styles.logo}>
         <img
           src="/images/Vector%20(1).png"
-          alt="DTO4T"
+          alt="TranTwin"
           style={styles.logoImage}
         />
       </div>
@@ -248,7 +248,7 @@ const NavBar = () => {
       <div style={styles.desktopButtonsContainer}>
         <Image
           src="/icons/globe.svg"
-          alt="DTO4T Logo"
+          alt="TranTwin Logo"
           width={32}
           height={32}
           style={styles.globeIcon}
