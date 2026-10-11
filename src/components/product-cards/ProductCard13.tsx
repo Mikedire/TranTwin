@@ -163,7 +163,7 @@ export default function ProductCard13(props: Props) {
             </Chip>
           )}
 
-          <Image width={400} height={400} src={imgUrl} id="productImg" alt="bonik" />
+          <Image width={400} height={400} src={imgUrl} id="productImg" alt="TranTwin" />
         </ImgBox>
       </Link>
 

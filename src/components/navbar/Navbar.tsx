@@ -5,17 +5,16 @@ import React from "react";
 import { usePathname } from "next/navigation";
 // import { loginUrl, registerUrl } from "@/app/authUtils"
 import { useResponsive } from "@hook/useResponsive";
+import { buildAuthorizeUrl } from "@lib/config";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const pathname = usePathname();
   const { isMobile, isDesktop } = useResponsive();
 
-  // Define URLs for login and register (to be moved)
-  const loginUrl =
-    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
-  const registerUrl =
-    "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Register&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login";
+  // Login/register URLs are driven by env config (see src/lib/config.ts)
+  const loginUrl = buildAuthorizeUrl("login");
+  const registerUrl = buildAuthorizeUrl("register");
   // Helper function to check if a link is active
   const isActiveLink = (href: string) => {
     if (href === "/") {

@@ -38,7 +38,7 @@ export default function Section5() {
           <Grid container spacing={20} alignItems="center" justifyContent="center">
             <Grid item lg={4} md={5} sm={6} xs={10}>
               <ImageBox>
-                <NextImage src={modelImage} alt="bonik" />
+                <NextImage src={modelImage} alt="TranTwin" />
               </ImageBox>
             </Grid>
 
@@ -71,7 +71,7 @@ export default function Section5() {
 
             <Grid item md={6} xs={12}>
               <ImageBox>
-                <NextImage src={apiImage} alt="bonik" />
+                <NextImage src={apiImage} alt="TranTwin" />
               </ImageBox>
             </Grid>
           </Grid>

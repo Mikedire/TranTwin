@@ -4,6 +4,7 @@ import Image from "next/image";
 import {useEffect, useRef, useState} from "react";
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { buildAuthorizeUrl } from "@lib/config";
 
 // Color constants - adjust these to match your design system
 const COLORS = {
@@ -260,7 +261,7 @@ export function LoginPromptText() {
         marginTop: '1.5rem'
     };
 
-    const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
+    const loginUrl = buildAuthorizeUrl("login")
 
     const textStyle: React.CSSProperties = {
         fontSize: '0.875rem'
@@ -299,7 +300,7 @@ export function LoginButton() {
         cursor: 'pointer'
     };
 
-    const loginUrl = "https://dgqatalyst.b2clogin.com/dgqatalyst.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_TranTwin_Login&client_id=a2fc7ccd-fd7e-450f-96ef-1d4c2b71e98e&nonce=defaultNonce&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=openid&response_type=code&prompt=login"
+    const loginUrl = buildAuthorizeUrl("login")
 
     const textStyle: React.CSSProperties = {
         fontSize: '0.875rem',

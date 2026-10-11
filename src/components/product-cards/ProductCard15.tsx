@@ -137,7 +137,7 @@ export default function ProductCard15(props: Props) {
             src={imgUrl}
             width={200}
             height={200}
-            alt="bonik"
+            alt="TranTwin"
             style={{ height: "auto", width: "100%", objectFit: "contain" }}
           />
         </Link>

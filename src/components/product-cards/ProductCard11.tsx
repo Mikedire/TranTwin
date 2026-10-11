@@ -52,7 +52,7 @@ export default function ProductCard11(props: ProductCard11Props) {
     <Link href={`/product/${slug}`}>
       <StyledProductCard>
         <Box mb="1rem" className="image-holder">
-          <NextImage src={imgUrl} width={150} height={150} alt="bonik" />
+          <NextImage src={imgUrl} width={150} height={150} alt="TranTwin" />
         </Box>
 
         <Box mb="0.5rem">

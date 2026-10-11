@@ -25,15 +25,11 @@ export default function Page({
         })
     }, []);
 
-    //fetch messages for said session
+    //fetch messages for said session (proxied server-side via /api/clinic/session)
     useEffect(() => {
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0ZW1wX2F1ZGllbmNlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdCIsImVtYWlsIjoib3RpZW5vc2Ftd2VsbWl0dG9AZ21haWwuY29tIn0.UT961kEmqTkSFjo2vmtswPfNTsTMJ8Gr-ImD1Gg9BW0");
-
         if (session != "") {
-            fetch("http://20.127.243.189/v1/clinic/session/" + session, {
+            fetch("/api/clinic/session?id=" + session, {
                 method: "GET",
-                headers: myHeaders,
                 redirect: "follow"
             })
                 .then((response) => response.json())
@@ -46,15 +42,11 @@ export default function Page({
     }, [session]);
 
     function onSendMessage(text: String) {
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0ZW1wX2F1ZGllbmNlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdCIsImVtYWlsIjoib3RpZW5vc2Ftd2VsbWl0dG9AZ21haWwuY29tIn0.UT961kEmqTkSFjo2vmtswPfNTsTMJ8Gr-ImD1Gg9BW0");
-
         let message = {role: "user", content: text};
         //@ts-ignore
         setSessionMessages(sessionMessages => [...sessionMessages, message])
-        fetch("http://20.127.243.189/v1/clinic/session?session-id=" + session + "&query=" + text, {
+        fetch("/api/clinic/session?id=" + session + "&query=" + encodeURIComponent(text.toString()), {
             method: "GET",
-            headers: myHeaders,
             redirect: "follow"
         })
             .then((response) => response.json())

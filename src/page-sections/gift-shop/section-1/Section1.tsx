@@ -37,7 +37,7 @@ export default async function Section1() {
               </GridItemOne>
 
               <GridItemTwo item md={6} xs={12}>
-                <NextImage priority width={600} height={450} src={item.imgUrl} alt="bonik" />
+                <NextImage priority width={600} height={450} src={item.imgUrl} alt="TranTwin" />
               </GridItemTwo>
             </StyledGrid>
           </div>

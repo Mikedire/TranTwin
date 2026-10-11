@@ -30,7 +30,7 @@ export default function Section1({ id, carouselData }: Props) {
               </GridItemOne>
 
               <GridItemTwo item md={6} xs={12}>
-                <LazyImage priority width={570} height={360} src={imgUrl} alt="bonik" />
+                <LazyImage priority width={570} height={360} src={imgUrl} alt="TranTwin" />
               </GridItemTwo>
             </StyledGrid>
           </div>

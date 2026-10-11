@@ -42,7 +42,7 @@ export default async function Section1() {
               </div>
 
               <Box className="card__img" minWidth="285px" height="180px" position="relative">
-                <NextImage alt="bonik" src={item.imgUrl} width={286} height={181} />
+                <NextImage alt="TranTwin" src={item.imgUrl} width={286} height={181} />
               </Box>
             </ContentWrapper>
           </Card>

@@ -32,7 +32,7 @@ export default async function Section3() {
                 <NextImage
                   width={46}
                   height={46}
-                  alt="bonik"
+                  alt="TranTwin"
                   src={item.image}
                   objectFit="contain"
                 />

@@ -36,7 +36,7 @@ export default function Section2({ offerProducts }: Props) {
               <Box width="40%" position="relative" height={120}>
                 <LazyImage
                   fill
-                  alt="bonik"
+                  alt="TranTwin"
                   src={item.imgUrl}
                   sizes="(100vw, 100vh)"
                   style={{ objectFit: "contain" }}

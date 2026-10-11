@@ -49,7 +49,7 @@ export default function MiniCart({ toggleSidenav = () => {} }: MiniCartProps) {
             flexDirection="column"
             justifyContent="center"
             height="calc(100% - 80px)">
-            <Image src="/assets/images/logos/shopping-bag.svg" width={90} height={90} alt="bonik" />
+            <Image src="/assets/images/logos/shopping-bag.svg" width={90} height={90} alt="TranTwin" />
             <Paragraph mt="1rem" color="text.muted" textAlign="center" maxWidth="200px">
               Your shopping bag is empty. Start shopping
             </Paragraph>

@@ -82,7 +82,7 @@ stages:
 
           if [ "${{ parameters.environment }}" = "prod" ]; then
             sed "s|__IMAGE_PLACEHOLDER__|$(REGISTRY_URL)/trantwin/$(imageName):$(imageTag)|" \
-              k8s/prod/deployment.yaml > k8s/rendered-deployment.yaml
+              k8s/production/deployment.yaml > k8s/rendered-deployment.yaml
           else
             sed "s|image: .*$|image: $(REGISTRY_URL)/trantwin/$(imageName):$(imageTag)|" \
               k8s/${{ parameters.environment }}/deployment.yaml > k8s/rendered-deployment.yaml

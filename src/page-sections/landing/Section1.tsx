@@ -23,7 +23,7 @@ export default function Section1() {
       <Container id="section-1" mt="4rem" mb="7rem" position="relative">
         <Box maxWidth="830px" mx="auto" mb="64px" textAlign="center">
           <Box mx="auto" maxWidth="360px">
-            <NextImage alt="bonik" src={thisIsBonik} />
+            <NextImage alt="TranTwin" src={thisIsBonik} />
           </Box>
 
           <H4 color="primary.main" fontSize="18px">
@@ -53,7 +53,7 @@ export default function Section1() {
           </FlexBox>
 
           <Box mt={4}>
-            <a href="mailto:support@ui-lib.com?subject=I need Bonik server solution" target="_blank">
+            <a href="mailto:support@ui-lib.com?subject=I need TranTwin server solution" target="_blank">
               <Paragraph
                 color="gray.600"
                 style={{ textDecoration: "underline", cursor: "pointer" }}>
@@ -64,7 +64,7 @@ export default function Section1() {
         </Box>
 
         <NextImage
-          alt="bonik"
+          alt="TranTwin"
           src={pageGroup}
           placeholder="blur"
           blurDataURL={pageGroup.blurDataURL}

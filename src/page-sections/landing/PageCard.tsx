@@ -61,7 +61,7 @@ export default function PageCard({ imgUrl, previewUrl, title, badge }: PageCardP
         position="relative"
         borderColor="gray.300">
         <Card boxShadow="large">
-          <NextImage src={imgUrl} width={470} height={400} alt="bonik" />
+          <NextImage src={imgUrl} width={470} height={400} alt="TranTwin" />
         </Card>
 
         {badge && <StatusChip>New</StatusChip>}

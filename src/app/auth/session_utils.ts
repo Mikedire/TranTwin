@@ -5,7 +5,11 @@ export function getSession(): AuthSession | null {
     const session = localStorage.getItem(SESSION_KEY);
 
     if (session) {
-        return JSON.parse(session);
+        try {
+            return JSON.parse(session);
+        } catch {
+            return null;
+        }
     }
     return null;
 }

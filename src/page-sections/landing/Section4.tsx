@@ -70,7 +70,7 @@ export default function Section4() {
                 flexDirection="column"
                 justifyContent="center">
                 <Box mb="1rem">
-                  <NextImage width={60} height={60} alt="bonik" src={item.imgUrl} />
+                  <NextImage width={60} height={60} alt="TranTwin" src={item.imgUrl} />
                 </Box>
 
                 <H4 mx="auto" fontSize="14px" fontWeight="700" maxWidth="200px" textAlign="center">

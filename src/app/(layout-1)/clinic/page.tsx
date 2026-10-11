@@ -17,10 +17,6 @@ export default function Page() {
             return
         }
 
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0ZW1wX2F1ZGllbmNlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdCIsImVtYWlsIjoib3RpZW5vc2Ftd2VsbWl0dG9AZ21haWwuY29tIn0.UT961kEmqTkSFjo2vmtswPfNTsTMJ8Gr-ImD1Gg9BW0");
-        myHeaders.append("Content-Type", "application/json");
-
         const raw = JSON.stringify({
             "lifeCycleStage": "",
             "sector": "",
@@ -28,9 +24,10 @@ export default function Page() {
             "painPoints": text
         });
 
-        fetch("http://20.127.243.189/v1/clinic/session", {
+        // Proxied server-side (bearer token kept out of the browser).
+        fetch("/api/clinic/session", {
             method: "POST",
-            headers: myHeaders,
+            headers: {"Content-Type": "application/json"},
             body: raw,
             redirect: "follow"
         })
